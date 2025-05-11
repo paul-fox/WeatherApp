@@ -1,0 +1,103 @@
+﻿@model IEnumerable<WeatherApp.Models.WeatherAPI.Root>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Weather</h1>
+
+    <meta charset="UTF-8">
+    <link href="css/stylesheet1.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/img/logo1.png" rel="icon">
+    <script type="module"></script>
+
+    <header class="header">
+        @using (Html.BeginForm("SearchLocation", "Home", FormMethod.Post))
+        {
+            <label for="query">Location</label>
+            <input id="query" placeholder="Search..." type="text" name="query">            
+            <button class="fa fa-search" type="submit" name="query"></button>
+        }
+    </header>
+
+    @if (Model != null)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        DateTime
+                    </th>
+                    <th>
+                        City
+                    </th>
+                    <th>
+                        Icon
+                    </th>
+                    <th>
+                        Weather
+                    </th>
+                    <th>
+                        Weather Description
+                    </th>
+                    <th>
+                        Temp
+                    </th>
+                    <th>
+                        Feels Like
+                    </th>
+                    <th>
+                        Min
+                    </th>
+                    <th>
+                        Max
+                    </th>
+                    <th>
+                        Wind Speed
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody style="vertical-align : middle">
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).ToLocalTime()
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.name)
+                        </td>
+                        <td>
+                            <img src="@Global.IconToUrl(Global.HtmlToString(@Html.DisplayFor(modelItem => item.weather[0].icon)))" alt="Weather Icon" />
+                            </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.weather[0].main)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.weather[0].description)
+                        </td>
+                        <td>
+                            @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp)))°F
+                        </td>
+                        <td>
+                            @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.feels_like)))°F
+                        </td>
+                        <td>
+                            @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_min)))°F
+                        </td>
+                        <td>
+                            @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_max)))°F
+                        </td>
+                        <td>
+                            @Global.MpsToMph(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.wind.speed))) MPH
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>  
