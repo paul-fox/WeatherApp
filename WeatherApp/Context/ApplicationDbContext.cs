@@ -11,8 +11,8 @@ namespace WeatherApp.Context
 
         }
 
-        public DbSet<LocationSQL> LocationsSQL { get; set; }
-        public DbSet<WeatherSQL> WeathersSQL { get; set; }
+        //public DbSet<LocationSQL> LocationsSQL { get; set; }
+        public DbSet<WeatherSQL> Weathers { get; set; }
         //public DbSet<LocationAPI> LocationsAPI { get; set; }
         //public DbSet<WeatherAPI.Root> WeathersAPI { get; set; }
     }

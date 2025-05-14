@@ -21,37 +21,6 @@ namespace WeatherApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("WeatherApp.Models.LocationSQL", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("Latitude")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Longitude")
-                        .HasColumnType("real");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LocationsSQL");
-                });
-
             modelBuilder.Entity("WeatherApp.Models.WeatherSQL", b =>
                 {
                     b.Property<int>("Id")
@@ -61,23 +30,74 @@ namespace WeatherApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CityId")
+                    b.Property<int>("Cloudiness")
                         .HasColumnType("int");
 
-                    b.Property<string>("Datetime")
+                    b.Property<string>("Country")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Main")
+                    b.Property<int>("DateTime")
                         .HasColumnType("int");
 
-                    b.Property<string>("WeatherDisc")
+                    b.Property<double>("FeelsLike")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Humidity")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Lon")
+                        .HasColumnType("float");
+
+                    b.Property<string>("State")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Sunrise")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sunset")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Temp")
+                        .HasColumnType("float");
+
+                    b.Property<double>("TempMax")
+                        .HasColumnType("float");
+
+                    b.Property<double>("TempMin")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TimeZone")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Visibility")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Weather")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WeatherDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WeatherIcon")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("WindSpeed")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
-                    b.ToTable("WeathersSQL");
+                    b.ToTable("Weathers");
                 });
 #pragma warning restore 612, 618
         }

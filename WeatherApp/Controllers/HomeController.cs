@@ -1,21 +1,20 @@
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using WeatherApp.Models;
+using WeatherApp.Services;
 
 namespace WeatherApp.Controllers
 {    
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, GetSettings myService)
+            : base(logger, myService)
         {
-            _logger = logger;
         }
 
         public IActionResult Index()
         {
+            _myService.PrintApiKey();
             return View();
         }
 

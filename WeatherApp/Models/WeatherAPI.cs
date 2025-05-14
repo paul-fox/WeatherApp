@@ -1,18 +1,11 @@
-﻿using System.Diagnostics;
-using System.Drawing;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace WeatherApp.Models
 {
     public class WeatherAPI
     {
         public int Id { get; set; }
-        //public string[]? Weather { get; set; }
-        //public string[]? Main { get; set; }
-        //public string? Dt { get; set; }
-        //public string? Name { get; set; }
-        // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+
         public class Clouds
         {
             public int all { get; set; }

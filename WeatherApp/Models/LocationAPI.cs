@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net.Http.Headers;
-
-namespace WeatherApp.Models
+﻿namespace WeatherApp.Models
 {
     public class LocationAPI
     {

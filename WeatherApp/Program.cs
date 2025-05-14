@@ -1,7 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using WeatherApp.Context;
+using WeatherApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<MySettings>(
+    builder.Configuration.GetSection("MySettings"));
+
+builder.Services.AddTransient<GetSettings>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

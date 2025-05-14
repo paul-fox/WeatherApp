@@ -17,7 +17,6 @@ namespace WeatherApp.Controllers
             }
             else
             {
-
                 string weatherParameters = $"?lat={locationData[0].Lat.ToString()}&lon={locationData[0].Lon.ToString()}&appid={Global.apiKey}";
             
                 List<Root> weatherData = [];
@@ -37,10 +36,10 @@ namespace WeatherApp.Controllers
                     var data = response.Content.ReadAsAsync<Root>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
                     Root myDeserializedClass = data;
                     weatherData.Add(data);
-                    Debug.WriteLine($"Weather: {data.weather[0].main.ToString()}, {data.weather[0].description.ToString()}\n" +
+/*                    Debug.WriteLine($"Weather: {data.weather[0].main.ToString()}, {data.weather[0].description.ToString()}\n" +
                         $"Temperature: {Math.Round((data.main.temp - 273.15) * 9 / 5 + 32, 2)} Fahrenheit\n" +
                         $"City: {data.name.ToString()}\n" +
-                        $"Datetime: {DateTimeOffset.FromUnixTimeSeconds(data.dt).ToLocalTime()}");
+                        $"Datetime: {DateTimeOffset.FromUnixTimeSeconds(data.dt).ToLocalTime()}");*/
                 }
                 else
                 {

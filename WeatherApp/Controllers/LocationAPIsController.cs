@@ -45,10 +45,8 @@ namespace WeatherApp.Controllers
                     foreach (var data in dataObjects)
                     {
                         locationData.Add(data);
-                        /*Debug.WriteLine($"Name: {data.Name}\t Country: {data.Country}\t State: {data.State}\n" +
-                          $"Latitude: {data.Lat}\t Longitude: {data.Lon}");*/
-                        Debug.WriteLine($"City: {data.Name.ToString()}\t Country: {data.Country.ToString()}\t State: {data.State.ToString()}\n" +
-                            $"Latitude: {data.Lat.ToString()}\t Longitude: {data.Lon.ToString()}");
+/*                        Debug.WriteLine($"City: {data.Name.ToString()}\t Country: {data.Country.ToString()}\t State: {data.State.ToString()}\n" +
+                            $"Latitude: {data.Lat.ToString()}\t Longitude: {data.Lon.ToString()}");*/
                     }
                 }
                 else
@@ -65,18 +63,6 @@ namespace WeatherApp.Controllers
                     Debug.WriteLine("Location Not Found!");
                 }
 
-
-
-    /*            LocationSQL locationSQL = new LocationSQL(
-                    1,
-                    locationData[0].Name,
-                    locationData[0].Lat,
-                    locationData[0].Lon,
-                    locationData[0].Country,
-                    locationData[0].State
-
-                );
-                static LocationSQLsController.Create(LocationSQL locationSQL);*/
                 return locationData;
             }
         }
