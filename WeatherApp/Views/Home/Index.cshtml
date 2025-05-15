@@ -1,4 +1,5 @@
-﻿@model IEnumerable<WeatherApp.Models.WeatherAPI.Root>
+﻿@using WeatherApp.Services;
+@model IEnumerable<WeatherApp.Models.WeatherApiModel.Root>
 
 @{
     ViewData["Title"] = "Home Page";
@@ -53,13 +54,13 @@
                 {
                     <tr>
                         <td>
-                            Local Time: @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).ToLocalTime().ToString(Global.timeFormat)
+                            Local Time: @DateTimeOffset.FromUnixTimeSeconds(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).ToLocalTime().ToString(ConversionService.timeFormat)
                             @TimeZoneInfo.Local
                             <br>
                             Location Time: @System.TimeZoneInfo.ConvertTimeFromUtc(
-                                DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).UtcDateTime,
-                                Global.FindTimeZoneByOffset(Global.SecToHours(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]).ToString(Global.timeFormat)
-                            @Global.FindTimeZoneByOffset(Global.SecToHours(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]
+                                DateTimeOffset.FromUnixTimeSeconds(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).UtcDateTime,
+                                ConversionService.FindTimeZoneByOffset(ConversionService.SecToHours(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]).ToString(ConversionService.timeFormat)
+                            @ConversionService.FindTimeZoneByOffset(ConversionService.SecToHours(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]
 @*                             @System.TimeZoneInfo.ConvertTimeFromUtc(
                                      Global.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone)) *@
 @*                             <br>
@@ -70,18 +71,18 @@
                             @Html.DisplayFor(modelItem => item.name)
                         </td>
                         <td>
-                            <img src="@Global.IconToUrl(Global.HtmlToString(@Html.DisplayFor(modelItem => item.weather[0].icon)))" alt="Weather Icon" />
+                            <img src="@ConversionService.IconToUrl(ConversionService.HtmlToString(@Html.DisplayFor(modelItem => item.weather[0].icon)))" alt="Weather Icon" />
                             @Html.DisplayFor(modelItem => item.weather[0].main),
                             @Html.DisplayFor(modelItem => item.weather[0].description)
                         </td>
                         <td style="text-align : left">
-                            Temperature: @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp)))°F
+                            Temperature: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp)))°F
                             <br>
-                            Feels Like: @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.feels_like)))°F
+                            Feels Like: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.feels_like)))°F
                             <br>
-                            Min: @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_min)))°F
+                            Min: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_min)))°F
                             <br>
-                            Max: @Global.KelvinToFahrenheit(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_max)))°F
+                            Max: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_max)))°F
                         </td>
                         <td style="text-align : left">
 @*                             Sunrise: @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.sys.sunrise))).ToLocalTime()
@@ -91,9 +92,9 @@
                         <td style="text-align : left">
                             Humidity: @Html.DisplayFor(modelItem => item.main.humidity)%
                             <br>
-                            Visibility: @Global.MetersToMiles(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.visibility))) mi
+                            Visibility: @ConversionService.MetersToMiles(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.visibility))) mi
                             <br>
-                            Wind Speed: @Global.MpsToMph(Global.HtmlToDouble(@Html.DisplayFor(modelItem => item.wind.speed))) MPH
+                            Wind Speed: @ConversionService.MpsToMph(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.wind.speed))) MPH
                             <br>
                             Cloudiness: @Html.DisplayFor(modelItem => item.clouds.all)%
                         </td>

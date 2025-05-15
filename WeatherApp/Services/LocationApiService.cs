@@ -1,15 +1,21 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WeatherApp.Models;
 
-namespace WeatherApp.Controllers
+namespace WeatherApp.Services
 {
-    public class LocationAPIsController : Controller
+    public class LocationApiService : ILocationApiService
     {
-        [HttpPost]
-        public static List<LocationAPI> GetLocation(string query)
-        {            
+        private readonly MySettingsModel _settings;
+
+        public LocationApiService(IOptions<MySettingsModel> settings)
+        {
+            _settings = settings.Value;
+        }
+
+        public List<LocationApiModel> GetLocation(string query)
+        {
             if (query == null)
             {
                 return null;
@@ -17,20 +23,20 @@ namespace WeatherApp.Controllers
             else
             {
                 string[] queries = query.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                string locationParameters = $"?q={queries[0]}&limit={Global.queryLimit}&appid={Global.apiKey}";
-                List<LocationAPI> locationData = [];
+                string locationParameters = $"?q={queries[0]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+                List<LocationApiModel> locationData = [];
 
                 if (queries.Length == 3)
                 {
-                    locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={Global.queryLimit}&appid={Global.apiKey}";
+                    locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
                 }
                 else if (queries.Length == 2)
                 {
-                    locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={Global.queryLimit}&appid={Global.apiKey}";
+                    locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
                 }
 
                 HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(Global.locationURL);
+                client.BaseAddress = new Uri(_settings.LocationURL);
 
                 // Add an Accept header for JSON format.
                 client.DefaultRequestHeaders.Accept.Add(
@@ -41,12 +47,12 @@ namespace WeatherApp.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     // Parse the response body.
-                    var dataObjects = response.Content.ReadAsAsync<IEnumerable<LocationAPI>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                    var dataObjects = response.Content.ReadAsAsync<IEnumerable<LocationApiModel>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
                     foreach (var data in dataObjects)
                     {
                         locationData.Add(data);
-/*                        Debug.WriteLine($"City: {data.Name.ToString()}\t Country: {data.Country.ToString()}\t State: {data.State.ToString()}\n" +
-                            $"Latitude: {data.Lat.ToString()}\t Longitude: {data.Lon.ToString()}");*/
+                        /*                        Debug.WriteLine($"City: {data.Name.ToString()}\t Country: {data.Country.ToString()}\t State: {data.State.ToString()}\n" +
+                                                    $"Latitude: {data.Lat.ToString()}\t Longitude: {data.Lon.ToString()}");*/
                     }
                 }
                 else

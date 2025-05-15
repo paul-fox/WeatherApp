@@ -1,20 +1,24 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WeatherApp.Models;
 using WeatherApp.Services;
 
 namespace WeatherApp.Controllers
-{    
+{
     public class HomeController : BaseController
     {
-        public HomeController(ILogger<HomeController> logger, GetSettings myService)
-            : base(logger, myService)
+        public HomeController(
+            ILogger<HomeController> logger,
+            IOptions<MySettingsModel> mySettings,
+            ILocationApiService locationService,
+            IWeatherApiService weatherService)
+            : base(logger, mySettings, locationService, weatherService)
         {
         }
 
         public IActionResult Index()
         {
-            _myService.PrintApiKey();
             return View();
         }
 
@@ -32,8 +36,8 @@ namespace WeatherApp.Controllers
         [HttpPost]
         public ActionResult SearchLocation(string query)
         {
-            List<LocationAPI> locationData = LocationAPIsController.GetLocation(query);
-            List<WeatherAPI.Root> weatherData = WeatherAPIsController.GetWeather(locationData);
+            var locationData = _locationService.GetLocation(query);
+            var weatherData = _weatherService.GetWeather(locationData);
             return View("Index", weatherData);
         }
     }

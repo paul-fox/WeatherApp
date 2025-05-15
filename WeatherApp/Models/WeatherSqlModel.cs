@@ -1,6 +1,6 @@
 ﻿namespace WeatherApp.Models
 {
-    public class WeatherSQL
+    public class WeatherSqlModel
     {
         //Geo
         public int Id { get; set; }

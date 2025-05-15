@@ -1,10 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Options;
+using WeatherApp.Models;
+using WeatherApp.Services;
 
 namespace WeatherApp.Controllers
 {
-    public class WeatherSQLsController : Controller
+    public class WeatherSQLsController : BaseController
     {
+        public WeatherSQLsController(
+            ILogger<WeatherSQLsController> logger,
+            IOptions<MySettingsModel> mySettings,
+            ILocationApiService locationService,
+            IWeatherApiService weatherService)
+            : base(logger, mySettings, locationService, weatherService)
+        {
+        }
+
         public IActionResult Index()
         {
             return View();

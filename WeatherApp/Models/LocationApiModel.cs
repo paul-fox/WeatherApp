@@ -1,6 +1,6 @@
 ﻿namespace WeatherApp.Models
 {
-    public class LocationAPI
+    public class LocationApiModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

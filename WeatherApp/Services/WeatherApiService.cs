@@ -1,15 +1,21 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WeatherApp.Models;
-using static WeatherApp.Models.WeatherAPI;
+using static WeatherApp.Models.WeatherApiModel;
 
-namespace WeatherApp.Controllers
+namespace WeatherApp.Services
 {
-    public class WeatherAPIsController : Controller
+    public class WeatherApiService : IWeatherApiService
     {
-        [HttpPost]
-        public static List<Root> GetWeather(List<LocationAPI> locationData)
+        private readonly MySettingsModel _settings;
+
+        public WeatherApiService(IOptions<MySettingsModel> settings)
+        {
+            _settings = settings.Value;
+        }
+
+        public List<Root> GetWeather(List<LocationApiModel> locationData)
         {
             if (locationData == null)
             {
@@ -17,12 +23,12 @@ namespace WeatherApp.Controllers
             }
             else
             {
-                string weatherParameters = $"?lat={locationData[0].Lat.ToString()}&lon={locationData[0].Lon.ToString()}&appid={Global.apiKey}";
-            
+                string weatherParameters = $"?lat={locationData[0].Lat.ToString()}&lon={locationData[0].Lon.ToString()}&appid={_settings.ApiKey}";
+
                 List<Root> weatherData = [];
 
                 HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(Global.weatherURL);
+                client.BaseAddress = new Uri(_settings.WeatherURL);
 
                 // Add an Accept header for JSON format.
                 client.DefaultRequestHeaders.Accept.Add(
@@ -36,10 +42,10 @@ namespace WeatherApp.Controllers
                     var data = response.Content.ReadAsAsync<Root>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
                     Root myDeserializedClass = data;
                     weatherData.Add(data);
-/*                    Debug.WriteLine($"Weather: {data.weather[0].main.ToString()}, {data.weather[0].description.ToString()}\n" +
-                        $"Temperature: {Math.Round((data.main.temp - 273.15) * 9 / 5 + 32, 2)} Fahrenheit\n" +
-                        $"City: {data.name.ToString()}\n" +
-                        $"Datetime: {DateTimeOffset.FromUnixTimeSeconds(data.dt).ToLocalTime()}");*/
+                    /*                    Debug.WriteLine($"Weather: {data.weather[0].main.ToString()}, {data.weather[0].description.ToString()}\n" +
+                                            $"Temperature: {Math.Round((data.main.temp - 273.15) * 9 / 5 + 32, 2)} Fahrenheit\n" +
+                                            $"City: {data.name.ToString()}\n" +
+                                            $"Datetime: {DateTimeOffset.FromUnixTimeSeconds(data.dt).ToLocalTime()}");*/
                 }
                 else
                 {

@@ -2,7 +2,7 @@
 
 namespace WeatherApp.Models
 {
-    public class WeatherAPI
+    public class WeatherApiModel
     {
         public int Id { get; set; }
 
