@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
-using WeatherApp.Services;
+using WeatherApp.Services.Interfaces;
 
 namespace WeatherApp.Controllers
 {
@@ -11,9 +11,10 @@ namespace WeatherApp.Controllers
         public HomeController(
             ILogger<HomeController> logger,
             IOptions<MySettingsModel> mySettings,
-            ILocationApiService locationService,
-            IWeatherApiService weatherService)
-            : base(logger, mySettings, locationService, weatherService)
+            ILocationApiService locationApiService,
+            IWeatherApiService weatherApiService,
+            IWeatherSqlService weatherSqlService)
+            : base(logger, mySettings, locationApiService, weatherApiService, weatherSqlService)
         {
         }
 
@@ -34,10 +35,12 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost]
-        public ActionResult SearchLocation(string query)
+        public async Task<IActionResult> SearchLocation(string query)
         {
-            var locationData = _locationService.GetLocation(query);
-            var weatherData = _weatherService.GetWeather(locationData);
+            var locationData = _locationApiService.GetLocation(query);
+            var weatherData = _weatherApiService.GetWeather(locationData);
+            await _weatherSqlService.InsertWeather(locationData, weatherData);
+
             return View("Index", weatherData);
         }
     }

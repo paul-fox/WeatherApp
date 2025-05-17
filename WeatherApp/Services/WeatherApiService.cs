@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
+using WeatherApp.Services.Interfaces;
 using static WeatherApp.Models.WeatherApiModel;
 
 namespace WeatherApp.Services
@@ -23,7 +24,7 @@ namespace WeatherApp.Services
             }
             else
             {
-                string weatherParameters = $"?lat={locationData[0].Lat.ToString()}&lon={locationData[0].Lon.ToString()}&appid={_settings.ApiKey}";
+                string weatherParameters = $"?lat={locationData[0].lat.ToString()}&lon={locationData[0].lon.ToString()}&appid={_settings.ApiKey}";
 
                 List<Root> weatherData = [];
 

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WeatherApp.Context;
 using WeatherApp.Models;
 using WeatherApp.Services;
+using WeatherApp.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.Configure<MySettingsModel>(
 
 builder.Services.AddTransient<ILocationApiService, LocationApiService>();
 builder.Services.AddTransient<IWeatherApiService, WeatherApiService>();
+builder.Services.AddTransient<IWeatherSqlService, WeatherSqlService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

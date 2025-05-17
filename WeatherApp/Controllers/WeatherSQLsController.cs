@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
-using WeatherApp.Services;
+using WeatherApp.Services.Interfaces;
 
 namespace WeatherApp.Controllers
 {
@@ -11,9 +11,10 @@ namespace WeatherApp.Controllers
         public WeatherSQLsController(
             ILogger<WeatherSQLsController> logger,
             IOptions<MySettingsModel> mySettings,
-            ILocationApiService locationService,
-            IWeatherApiService weatherService)
-            : base(logger, mySettings, locationService, weatherService)
+            ILocationApiService locationApiService,
+            IWeatherApiService weatherApiService,
+            IWeatherSqlService weatherSqlService)
+            : base(logger, mySettings, locationApiService, weatherApiService, weatherSqlService)
         {
         }
 

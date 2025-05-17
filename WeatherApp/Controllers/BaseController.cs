@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
-using WeatherApp.Services;
+using WeatherApp.Services.Interfaces;
 
 namespace WeatherApp.Controllers
 {
@@ -9,19 +9,22 @@ namespace WeatherApp.Controllers
     {
         protected readonly ILogger<BaseController> _logger;
         protected readonly MySettingsModel _mySettings;
-        protected readonly ILocationApiService _locationService;
-        protected readonly IWeatherApiService _weatherService;
+        protected readonly ILocationApiService _locationApiService;
+        protected readonly IWeatherApiService _weatherApiService;
+        protected readonly IWeatherSqlService _weatherSqlService;
 
         protected BaseController(
             ILogger<BaseController> logger,
             IOptions<MySettingsModel> mySettings,
-            ILocationApiService locationService,
-            IWeatherApiService weatherService)
+            ILocationApiService locationApiService,
+            IWeatherApiService weatherApiService,
+            IWeatherSqlService weatherSqlService)
         {
             _logger = logger;
             _mySettings = mySettings.Value;
-            _locationService = locationService;
-            _weatherService = weatherService;
+            _locationApiService = locationApiService;
+            _weatherApiService = weatherApiService;
+            _weatherSqlService = weatherSqlService;
         }
     }
 }

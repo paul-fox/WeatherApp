@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
+using WeatherApp.Services.Interfaces;
 
 namespace WeatherApp.Services
 {

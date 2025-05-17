@@ -3,10 +3,10 @@
     public class LocationApiModel
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public float Lat { get; set; }
-        public float Lon { get; set; }
-        public string Country { get; set; }
-        public string State { get; set; } = string.Empty;
+        public string name { get; set; }
+        public double lat { get; set; }
+        public double lon { get; set; }
+        public string country { get; set; }
+        public string state { get; set; } = string.Empty;
     }
 }
