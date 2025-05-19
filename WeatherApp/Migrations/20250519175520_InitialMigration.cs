@@ -5,17 +5,18 @@
 namespace WeatherApp.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigrations : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Weathers",
+                name: "WeatherEntries",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CityId = table.Column<int>(type: "int", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Lat = table.Column<double>(type: "float", nullable: false),
                     Lon = table.Column<double>(type: "float", nullable: false),
@@ -39,7 +40,7 @@ namespace WeatherApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Weathers", x => x.Id);
+                    table.PrimaryKey("PK_WeatherEntries", x => x.Id);
                 });
         }
 
@@ -47,7 +48,7 @@ namespace WeatherApp.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Weathers");
+                name: "WeatherEntries");
         }
     }
 }

@@ -11,8 +11,8 @@ using WeatherApp.Context;
 namespace WeatherApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250512202608_InitialMigrations")]
-    partial class InitialMigrations
+    [Migration("20250519175520_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace WeatherApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("WeatherApp.Models.WeatherSQL", b =>
+            modelBuilder.Entity("WeatherApp.Models.WeatherSqlModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,6 +35,9 @@ namespace WeatherApp.Migrations
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Cloudiness")
                         .HasColumnType("int");
@@ -100,7 +103,7 @@ namespace WeatherApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Weathers");
+                    b.ToTable("WeatherEntries");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,12 +1,11 @@
-﻿@using WeatherApp.Services;
-@model IEnumerable<WeatherApp.Models.WeatherApiModel.Root>
+﻿@model IEnumerable<WeatherApp.Models.WeatherViewModel>
 
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Weather</h1>
+<div class="container py-5">
+    <h1 class="text-center mb-5 display-4 fw-bold">Weather Dashboard</h1>
 
     <meta charset="UTF-8">
     <link href="css/stylesheet1.css" rel="stylesheet">
@@ -14,94 +13,106 @@
     <link href="css/img/logo1.png" rel="icon">
     <script type="module"></script>
 
-    <header class="header">
-        @using (Html.BeginForm("SearchLocation", "Home", FormMethod.Post))
-        {
-            <label for="query">Location</label>
-            <input id="query" placeholder="Search..." type="text" name="query">            
-            <button class="fa fa-search" type="submit" name="query"></button>
-        }
-    </header>
+    <!-- Search Form -->
+    <form asp-action="SearchLocation" asp-controller="Home" method="post" class="mb-4">
+        <div class="input-group w-50 mx-auto">
+            <input type="text" class="form-control shadow-sm" name="query" placeholder="Enter a city or location" required />
+            <button type="submit" class="btn btn-primary shadow-sm">Search</button>
+        </div>
+    </form>
 
-    @if (Model != null)
+    <!-- Update All Button -->
+    <div class="text-center mb-4">
+        <form asp-action="UpdateAllWeather" asp-controller="Home" method="post">
+            <button type="submit" class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm">
+                Update All
+            </button>
+        </form>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        DateTime
-                    </th>
-                    <th>
-                        City
-                    </th>
-                    <th>
-                        Weather
-                    </th>
-                    <th>
-                        Temperature
-                    </th>
-                    <th>
-                        Daylight
-                    </th>
-                    <th>
-                        Misc.
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody style="vertical-align : middle">
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            Local Time: @DateTimeOffset.FromUnixTimeSeconds(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).ToLocalTime().ToString(ConversionService.timeFormat)
-                            @TimeZoneInfo.Local
-                            <br>
-                            Location Time: @System.TimeZoneInfo.ConvertTimeFromUtc(
-                                DateTimeOffset.FromUnixTimeSeconds(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.dt))).UtcDateTime,
-                                ConversionService.FindTimeZoneByOffset(ConversionService.SecToHours(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]).ToString(ConversionService.timeFormat)
-                            @ConversionService.FindTimeZoneByOffset(ConversionService.SecToHours(ConversionService.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))))[0]
-@*                             @System.TimeZoneInfo.ConvertTimeFromUtc(
-                                     Global.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone)) *@
-@*                             <br>
-                            .ToString("ddd, dd MMM yyyy HH:mm:ss")
-                            @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.timezone))).ToLocalTime() *@
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.name)
-                        </td>
-                        <td>
-                            <img src="@ConversionService.IconToUrl(ConversionService.HtmlToString(@Html.DisplayFor(modelItem => item.weather[0].icon)))" alt="Weather Icon" />
-                            @Html.DisplayFor(modelItem => item.weather[0].main),
-                            @Html.DisplayFor(modelItem => item.weather[0].description)
-                        </td>
-                        <td style="text-align : left">
-                            Temperature: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp)))°F
-                            <br>
-                            Feels Like: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.feels_like)))°F
-                            <br>
-                            Min: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_min)))°F
-                            <br>
-                            Max: @ConversionService.KelvinToFahrenheit(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.main.temp_max)))°F
-                        </td>
-                        <td style="text-align : left">
-@*                             Sunrise: @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.sys.sunrise))).ToLocalTime()
-                            <br>
-                            Sunset: @DateTimeOffset.FromUnixTimeSeconds(Global.HtmlToInt(@Html.DisplayFor(modelItem => item.sys.sunset))).ToLocalTime() *@
-                        </td>
-                        <td style="text-align : left">
-                            Humidity: @Html.DisplayFor(modelItem => item.main.humidity)%
-                            <br>
-                            Visibility: @ConversionService.MetersToMiles(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.visibility))) mi
-                            <br>
-                            Wind Speed: @ConversionService.MpsToMph(ConversionService.HtmlToDouble(@Html.DisplayFor(modelItem => item.wind.speed))) MPH
-                            <br>
-                            Cloudiness: @Html.DisplayFor(modelItem => item.clouds.all)%
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="alert alert-danger text-center shadow-sm">
+            @TempData["ErrorMessage"]
+        </div>
     }
 
-</div>  
+    <h2 class="text-center mb-4 fw-semibold">Weather Forecast History</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive rounded shadow-sm">
+            <table class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th>City</th>
+                        <th>Time</th>
+                        <th>Weather</th>
+                        <th>Temperature (°F)</th>
+                        <th>Sunrise / Sunset</th>
+                        <th>Other</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="align-middle">
+                            <td>
+                                <strong>@item.City</strong><br />
+                                <span class="text-muted">@item.State, @item.Country</span>
+                            </td>
+                            <td class="small">
+                                <strong>Local:</strong> @item.LocalTime.ToString("f")<br />
+                                <small>@item.LocalTimeZone</small><br />
+                                <strong>Location:</strong> @item.LocationTime.ToString("f")<br />
+                                <small>@item.LocationTimeZone</small>
+                            </td>
+                            <td>
+                                <img src="@item.WeatherIconUrl" alt="icon" style="height:40px;" class="mb-1" /><br />
+                                <strong>@item.Weather</strong><br />
+                                <small class="text-muted">@item.WeatherDescription</small>
+                            </td>
+                            <td class="small">
+                                Temp: <strong>@item.TempFahrenheit°F</strong><br />
+                                Feels Like: @item.FeelsLikeFahrenheit°F<br />
+                                Min/Max: @item.TempMinFahrenheit°F / @item.TempMaxFahrenheit°F
+                            </td>
+                            <td class="small">
+                                <strong>Sunrise:</strong><br />
+                                @item.SunriseLocalTime.ToString("t") (Local)<br />
+                                @item.SunriseLocationTime.ToString("t") (Loc. TZ)<br />
+                                <strong>Sunset:</strong><br />
+                                @item.SunsetLocalTime.ToString("t") (Local)<br />
+                                @item.SunsetLocationTime.ToString("t") (Loc. TZ)
+                            </td>
+                            <td class="small">
+                                Humidity: @item.Humidity%<br />
+                                Visibility: @item.Visibility @item.VisibilityUnit<br />
+                                Wind: @item.WindSpeedMph mph<br />
+                                Clouds: @item.Cloudiness%
+                            </td>
+                            <td>
+                                <form asp-action="DeleteWeather" asp-controller="Home" method="post" 
+                                    onsubmit="return confirm('Are you sure you want to delete this entry?');">
+                                    <input type="hidden" name="weatherId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-muted">No weather data found in the database.</p>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
+}

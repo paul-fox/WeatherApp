@@ -1,10 +1,13 @@
 ﻿using WeatherApp.Models;
-using static WeatherApp.Models.WeatherApiModel;
 
 namespace WeatherApp.Services.Interfaces
 {
     public interface IWeatherSqlService
     {
-        Task InsertWeather(List<LocationApiModel> locationData, List<Root> weatherData);
+        Task InsertWeatherAsync(List<LocationApiModel> locationData, Root weatherData);
+        Task<List<WeatherSqlModel>> GetAllWeatherAsync();
+        Task<bool> IsSavedLocationAsync(int cityId);
+        Task UpdateAllWeatherAsync();
+        Task DeleteWeatherAsync(int weatherId);
     }
 }

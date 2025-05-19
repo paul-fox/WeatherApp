@@ -4,6 +4,6 @@ namespace WeatherApp.Services.Interfaces
 {
     public interface IWeatherApiService
     {
-        List<WeatherApiModel.Root> GetWeather(List<LocationApiModel> locationData);
+        Task<Root?> GetWeatherAsync(double lat, double lon);
     }
 }

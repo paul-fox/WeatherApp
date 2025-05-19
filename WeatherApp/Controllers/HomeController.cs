@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
 using WeatherApp.Services.Interfaces;
+using WeatherApp.Utilities;
 
 namespace WeatherApp.Controllers
 {
@@ -18,9 +19,60 @@ namespace WeatherApp.Controllers
         {
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var weatherSqlModels = await _weatherSqlService.GetAllWeatherAsync();
+
+            var weatherViewModels = weatherSqlModels.Select(entry =>
+            {
+                var timeZone = ConversionUtil.FindTimeZoneByOffset(ConversionUtil.SecToHours(entry.TimeZone)).FirstOrDefault() ?? TimeZoneInfo.Local;
+
+                var utcTime = DateTimeOffset.FromUnixTimeSeconds(entry.DateTime).UtcDateTime;
+                var sunriseUtc = DateTimeOffset.FromUnixTimeSeconds(entry.Sunrise).UtcDateTime;
+                var sunsetUtc = DateTimeOffset.FromUnixTimeSeconds(entry.Sunset).UtcDateTime;
+
+                var (visibility, visibilityUnit) = ConversionUtil.VisibilityConversion(entry.Visibility);
+
+                return new WeatherViewModel
+                {
+                    // Location
+                    Id = entry.Id,
+                    City = entry.City,
+                    Country = entry.Country,
+                    State = entry.State,
+
+                    // Time
+                    LocalTime = utcTime.ToLocalTime(),
+                    LocalTimeZone = TimeZoneInfo.Local.DisplayName,
+                    LocationTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone),
+                    LocationTimeZone = timeZone.DisplayName,
+
+                    SunriseLocalTime = TimeZoneInfo.ConvertTimeFromUtc(sunriseUtc, TimeZoneInfo.Local),
+                    SunriseLocationTime = TimeZoneInfo.ConvertTimeFromUtc(sunriseUtc, timeZone),
+                    SunsetLocalTime = TimeZoneInfo.ConvertTimeFromUtc(sunsetUtc, TimeZoneInfo.Local),
+                    SunsetLocationTime = TimeZoneInfo.ConvertTimeFromUtc(sunsetUtc, timeZone),
+
+                    // Weather
+                    Weather = entry.Weather,
+                    WeatherDescription = entry.WeatherDescription,
+                    WeatherIconUrl = $"{_mySettings.IconURL}{entry.WeatherIcon}.png",
+
+                    // Temp
+                    TempFahrenheit = ConversionUtil.KelvinToFahrenheit(entry.Temp),
+                    FeelsLikeFahrenheit = ConversionUtil.KelvinToFahrenheit(entry.FeelsLike),
+                    TempMinFahrenheit = ConversionUtil.KelvinToFahrenheit(entry.TempMin),
+                    TempMaxFahrenheit = ConversionUtil.KelvinToFahrenheit(entry.TempMax),
+
+                    // Misc.
+                    Humidity = entry.Humidity,
+                    Visibility = visibility,
+                    VisibilityUnit = visibilityUnit,
+                    WindSpeedMph = ConversionUtil.MpsToMph(entry.WindSpeed),
+                    Cloudiness = entry.Cloudiness
+                };
+            }).ToList();
+
+            return View(weatherViewModels);
         }
 
         public IActionResult Privacy()
@@ -35,13 +87,61 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SearchLocation(string query)
+        public async Task<IActionResult> SearchLocationAsync(string query)
         {
-            var locationData = _locationApiService.GetLocation(query);
-            var weatherData = _weatherApiService.GetWeather(locationData);
-            await _weatherSqlService.InsertWeather(locationData, weatherData);
+            try
+            {
+                var locationData = await _locationApiService.GetLocationAsync(query);
 
-            return View("Index", weatherData);
+                // Check if no location is found
+                if (locationData == null || !locationData.Any())
+                {
+                    TempData["ErrorMessage"] = "Location not found. Please try another search.";
+                    return RedirectToAction("Index");
+                }
+
+                var weatherData = await _weatherApiService.GetWeatherAsync(locationData.First().lat, locationData.First().lon);
+
+                // Check if weatherData is null
+                if (weatherData == null)
+                {
+                    TempData["ErrorMessage"] = "Weather data could not be retrieved.";
+                    return RedirectToAction("Index");
+                }
+
+                bool exists = await _weatherSqlService.IsSavedLocationAsync(weatherData.id);
+
+                if (!exists)
+                {
+                    await _weatherSqlService.InsertWeatherAsync(locationData, weatherData);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Location already exists. Please try another search.";
+                    return RedirectToAction("Index");
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while searching for the location.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateAllWeatherAsync()
+        {
+            await _weatherSqlService.UpdateAllWeatherAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteWeatherAsync(int weatherId)
+        {
+            await _weatherSqlService.DeleteWeatherAsync(weatherId);
+            return RedirectToAction("Index");
         }
     }
 }

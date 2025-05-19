@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using WeatherApp.Models;
 using WeatherApp.Services.Interfaces;
-using static WeatherApp.Models.WeatherApiModel;
 
 namespace WeatherApp.Services
 {
@@ -16,52 +15,44 @@ namespace WeatherApp.Services
             _settings = settings.Value;
         }
 
-        public List<Root> GetWeather(List<LocationApiModel> locationData)
+        public async Task<Root?> GetWeatherAsync(double lat, double lon)
         {
-            if (locationData == null)
+            if (double.IsNaN(lat) || double.IsNaN(lon))
             {
                 return null;
             }
-            else
+
+            var weatherParameters = $"?lat={lat}&lon={lon}&appid={_settings.ApiKey}";
+
+            using var client = new HttpClient
             {
-                string weatherParameters = $"?lat={locationData[0].lat.ToString()}&lon={locationData[0].lon.ToString()}&appid={_settings.ApiKey}";
+                BaseAddress = new Uri(_settings.WeatherURL)
+            };
 
-                List<Root> weatherData = [];
+            // Add an Accept header for JSON format.
+            client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
 
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(_settings.WeatherURL);
+            // List data response.
+            try
+            {
+                var response = await client.GetAsync(weatherParameters);
 
-                // Add an Accept header for JSON format.
-                client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-
-                // List data response.
-                HttpResponseMessage response = client.GetAsync(weatherParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
                 if (response.IsSuccessStatusCode)
                 {
-                    // Parse the response body.
-                    var data = response.Content.ReadAsAsync<Root>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
-                    Root myDeserializedClass = data;
-                    weatherData.Add(data);
-                    /*                    Debug.WriteLine($"Weather: {data.weather[0].main.ToString()}, {data.weather[0].description.ToString()}\n" +
-                                            $"Temperature: {Math.Round((data.main.temp - 273.15) * 9 / 5 + 32, 2)} Fahrenheit\n" +
-                                            $"City: {data.name.ToString()}\n" +
-                                            $"Datetime: {DateTimeOffset.FromUnixTimeSeconds(data.dt).ToLocalTime()}");*/
+                    var weatherData = await response.Content.ReadFromJsonAsync<Root>();
+                    return weatherData;
                 }
                 else
                 {
-                    Debug.WriteLine((int)response.StatusCode, response.ReasonPhrase);
+                    Debug.WriteLine($"Error: {(int)response.StatusCode} - {response.ReasonPhrase}");
+                    return null;
                 }
-
-                // Make any other calls using HttpClient here.
-
-                // Dispose once all HttpClient calls are complete. This is not necessary if the containing object will be disposed of; for example in this case the HttpClient instance will be disposed automatically when the application terminates so the following call is superfluous.
-                client.Dispose();
-                if (weatherData.Count == 0)
-                {
-                    Debug.WriteLine("Weather Not Found!");
-                }
-                return weatherData;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception fetching weather: {ex.Message}");
+                return null;
             }
         }
     }

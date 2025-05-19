@@ -15,62 +15,56 @@ namespace WeatherApp.Services
             _settings = settings.Value;
         }
 
-        public List<LocationApiModel> GetLocation(string query)
+        public async Task<List<LocationApiModel>?> GetLocationAsync(string query)
         {
-            if (query == null)
-            {
+            if (string.IsNullOrWhiteSpace(query))
                 return null;
-            }
+
+            string[] queries = query.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string locationParameters;
+
+            if (queries.Length == 3)
+                locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+            else if (queries.Length == 2)
+                locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
             else
+                locationParameters = $"?q={queries[0]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+
+            using var client = new HttpClient
             {
-                string[] queries = query.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                string locationParameters = $"?q={queries[0]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
-                List<LocationApiModel> locationData = [];
+                BaseAddress = new Uri(_settings.LocationURL)
+            };
 
-                if (queries.Length == 3)
-                {
-                    locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
-                }
-                else if (queries.Length == 2)
-                {
-                    locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
-                }
+            // Add an Accept header for JSON format.
+            client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
 
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(_settings.LocationURL);
+            // List data response.
+            try
+            {
+                var response = await client.GetAsync(locationParameters);
 
-                // Add an Accept header for JSON format.
-                client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-
-                // List data response.
-                HttpResponseMessage response = client.GetAsync(locationParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
                 if (response.IsSuccessStatusCode)
                 {
-                    // Parse the response body.
-                    var dataObjects = response.Content.ReadAsAsync<IEnumerable<LocationApiModel>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
-                    foreach (var data in dataObjects)
+                    var dataObjects = await response.Content.ReadFromJsonAsync<List<LocationApiModel>>();
+                    if (dataObjects == null || !dataObjects.Any())
                     {
-                        locationData.Add(data);
-                        /*                        Debug.WriteLine($"City: {data.Name.ToString()}\t Country: {data.Country.ToString()}\t State: {data.State.ToString()}\n" +
-                                                    $"Latitude: {data.Lat.ToString()}\t Longitude: {data.Lon.ToString()}");*/
+                        Debug.WriteLine("Location Not Found!");
+                        return [];
                     }
+
+                    return dataObjects;
                 }
                 else
                 {
-                    Debug.WriteLine((int)response.StatusCode, response.ReasonPhrase);
+                    Debug.WriteLine($"Error: {(int)response.StatusCode} - {response.ReasonPhrase}");
+                    return [];
                 }
-
-                // Make any other calls using HttpClient here.
-
-                // Dispose once all HttpClient calls are complete. This is not necessary if the containing object will be disposed of; for example in this case the HttpClient instance will be disposed automatically when the application terminates so the following call is superfluous.
-                client.Dispose();
-                if (locationData.Count == 0)
-                {
-                    Debug.WriteLine("Location Not Found!");
-                }
-
-                return locationData;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception fetching location: {ex.Message}");
+                return [];
             }
         }
     }

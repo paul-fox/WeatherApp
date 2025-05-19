@@ -4,6 +4,6 @@ namespace WeatherApp.Services.Interfaces
 {
     public interface ILocationApiService
     {
-        List<LocationApiModel> GetLocation(string query);
+        Task<List<LocationApiModel>?> GetLocationAsync(string query);
     }
 }
