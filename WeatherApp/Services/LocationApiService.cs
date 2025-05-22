@@ -24,15 +24,15 @@ namespace WeatherApp.Services
             string locationParameters;
 
             if (queries.Length == 3)
-                locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+                locationParameters = $"?q={queries[0]},{queries[1]},{queries[2]}&limit={_settings.LocationQueryLimit}&appid={_settings.ApiKey}";
             else if (queries.Length == 2)
-                locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+                locationParameters = $"?q={queries[0]},{queries[1]},{""}&limit={_settings.LocationQueryLimit}&appid={_settings.ApiKey}";
             else
-                locationParameters = $"?q={queries[0]}&limit={_settings.QueryLimit}&appid={_settings.ApiKey}";
+                locationParameters = $"?q={queries[0]}&limit={_settings.LocationQueryLimit}&appid={_settings.ApiKey}";
 
             using var client = new HttpClient
             {
-                BaseAddress = new Uri(_settings.LocationURL)
+                BaseAddress = new Uri(_settings.LocationUrlBase)
             };
 
             // Add an Accept header for JSON format.

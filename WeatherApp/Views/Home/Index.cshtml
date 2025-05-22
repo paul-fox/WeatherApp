@@ -4,14 +4,17 @@
     ViewData["Title"] = "Home Page";
 }
 
+@section Styles {
+    <style>
+        #weather-container {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+}
+
 <div class="container py-5">
     <h1 class="text-center mb-5 display-4 fw-bold">Weather Dashboard</h1>
-
-    <meta charset="UTF-8">
-    <link href="css/stylesheet1.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/img/logo1.png" rel="icon">
-    <script type="module"></script>
 
     <!-- Search Form -->
     <form asp-action="SearchLocation" asp-controller="Home" method="post" class="mb-4">
@@ -23,13 +26,12 @@
 
     <!-- Update All Button -->
     <div class="text-center mb-4">
-        <form asp-action="UpdateAllWeather" asp-controller="Home" method="post">
-            <button type="submit" class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm">
-                Update All
-            </button>
-        </form>
+        <button type="submit" id="update-all-btn" class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm">
+            Update All
+        </button>
     </div>
 
+    <!-- Search Error -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger text-center shadow-sm">
@@ -39,80 +41,110 @@
 
     <h2 class="text-center mb-4 fw-semibold">Weather Forecast History</h2>
 
-    @if (Model != null && Model.Any())
-    {
-        <div class="table-responsive rounded shadow-sm">
-            <table class="table table-bordered table-hover align-middle text-center">
-                <thead class="table-primary">
-                    <tr>
-                        <th>City</th>
-                        <th>Time</th>
-                        <th>Weather</th>
-                        <th>Temperature (°F)</th>
-                        <th>Sunrise / Sunset</th>
-                        <th>Other</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr class="align-middle">
-                            <td>
-                                <strong>@item.City</strong><br />
-                                <span class="text-muted">@item.State, @item.Country</span>
-                            </td>
-                            <td class="small">
-                                <strong>Local:</strong> @item.LocalTime.ToString("f")<br />
-                                <small>@item.LocalTimeZone</small><br />
-                                <strong>Location:</strong> @item.LocationTime.ToString("f")<br />
-                                <small>@item.LocationTimeZone</small>
-                            </td>
-                            <td>
-                                <img src="@item.WeatherIconUrl" alt="icon" style="height:40px;" class="mb-1" /><br />
-                                <strong>@item.Weather</strong><br />
-                                <small class="text-muted">@item.WeatherDescription</small>
-                            </td>
-                            <td class="small">
-                                Temp: <strong>@item.TempFahrenheit°F</strong><br />
-                                Feels Like: @item.FeelsLikeFahrenheit°F<br />
-                                Min/Max: @item.TempMinFahrenheit°F / @item.TempMaxFahrenheit°F
-                            </td>
-                            <td class="small">
-                                <strong>Sunrise:</strong><br />
-                                @item.SunriseLocalTime.ToString("t") (Local)<br />
-                                @item.SunriseLocationTime.ToString("t") (Loc. TZ)<br />
-                                <strong>Sunset:</strong><br />
-                                @item.SunsetLocalTime.ToString("t") (Local)<br />
-                                @item.SunsetLocationTime.ToString("t") (Loc. TZ)
-                            </td>
-                            <td class="small">
-                                Humidity: @item.Humidity%<br />
-                                Visibility: @item.Visibility @item.VisibilityUnit<br />
-                                Wind: @item.WindSpeedMph mph<br />
-                                Clouds: @item.Cloudiness%
-                            </td>
-                            <td>
-                                <form asp-action="DeleteWeather" asp-controller="Home" method="post" 
-                                    onsubmit="return confirm('Are you sure you want to delete this entry?');">
-                                    <input type="hidden" name="weatherId" value="@item.Id" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
-                                        <i class="bi bi-trash"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <!-- Update Timestamp -->
+    <div class="text-end text-muted small" id="last-updated">
+        Last updated: never
+    </div>
+
+    <!-- Weather Table -->
+    <div id="weather-container">
+        @await Html.PartialAsync("_WeatherTable", Model)
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-spinner" class="text-center my-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
-    }
-    else
-    {
-        <p class="text-center text-muted">No weather data found in the database.</p>
-    }
+    </div>
+
+   
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
+    <script>
+        async function refreshWeather() {
+            document.getElementById('loading-spinner').style.display = 'block';
+            
+            const container = document.getElementById('weather-container');
+            container.style.opacity = 0;
+            
+            try {
+                const response = await fetch('/Home/WeatherTablePartial');
+                const html = await response.text();
+                container.innerHTML = html;
+                
+                setTimeout(() => container.style.opacity = 1, 50);
+
+                document.getElementById('last-updated').innerText =
+                    "Last updated: " + new Date().toLocaleTimeString();
+            } catch (err) {
+                console.error("Weather update failed", err);
+                container.style.opacity = 1;
+            } finally {
+                document.getElementById('loading-spinner').style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            refreshWeather(); // On page load
+            setInterval(refreshWeather, 300000); // Every 5 minutes
+
+            // Update All
+            document.getElementById('update-all-btn').addEventListener('click', async (e) => {
+                e.preventDefault(); // Prevent accidental fallback behavior
+                document.getElementById('loading-spinner').style.display = 'block';
+
+                try {
+                    const updateUrl = '@Url.Action("UpdateAllWeather", "Home")';
+                    const response = await fetch(updateUrl, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token
+                        }
+                    });
+
+                    if (response.ok) {
+                        await refreshWeather();
+                    } else {
+                        console.error("Update failed with status", response.status);
+                    }
+                } catch (err) {
+                    console.error("UpdateAllWeatherAsync call failed", err);
+                } finally {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                }
+            });
+
+            // Delete
+            document.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    const weatherId = e.target.dataset.id;
+                    if (!confirm('Are you sure you want to delete this location?')) return;
+
+                    try {
+                        const deleteUrl = '@Url.Action("DeleteWeather", "Home")';
+                        const response = await fetch(deleteUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                                    },
+                            body: JSON.stringify({ weatherId: parseInt(weatherId) })
+                        });
+
+                        if (response.ok) {
+                            await refreshWeather();
+                        } else {
+                            console.error("Delete failed with status", response.status);
+                        }
+                    } catch (err) {
+                        console.error("DeleteWeatherAsync call failed", err);
+                    }
+                }
+            });
+        });
+    </script>
 }

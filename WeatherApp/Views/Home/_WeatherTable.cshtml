@@ -1,0 +1,71 @@
+﻿@model IEnumerable<WeatherApp.Models.WeatherViewModel>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive rounded shadow-sm">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-primary">
+                <tr>
+                    <th>City</th>
+                    <th>Time</th>
+                    <th>Weather</th>
+                    <th>Temperature (°F)</th>
+                    <th>Sunrise / Sunset</th>
+                    <th>Other</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="align-middle">
+                        <td>
+                            <strong>@item.City</strong><br />
+                            <span class="text-muted">@item.State, @item.Country</span>
+                        </td>
+                        <td class="small">
+                            <strong>Local:</strong> @item.LocalTime.ToString("f")<br />
+                            <small>@item.LocalTimeZone</small><br />
+                            <strong>Location:</strong> @item.LocationTime.ToString("f")<br />
+                            <small>@item.LocationTimeZone</small>
+                        </td>
+                        <td>
+                            <img src="@item.WeatherIconUrl" alt="icon" style="height:40px;" class="mb-1" /><br />
+                            <strong>@item.Weather</strong><br />
+                            <small class="text-muted">@item.WeatherDescription</small>
+                        </td>
+                        <td class="small">
+                            Temp: <strong>@item.TempFahrenheit°F</strong><br />
+                            Feels Like: @item.FeelsLikeFahrenheit°F<br />
+                            Min/Max: @item.TempMinFahrenheit°F / @item.TempMaxFahrenheit°F
+                        </td>
+                        <td class="small">
+                            <strong>Sunrise:</strong><br />
+                            @item.SunriseLocalTime.ToString("t") (Local)<br />
+                            @item.SunriseLocationTime.ToString("t") (Loc. TZ)<br />
+                            <strong>Sunset:</strong><br />
+                            @item.SunsetLocalTime.ToString("t") (Local)<br />
+                            @item.SunsetLocationTime.ToString("t") (Loc. TZ)
+                        </td>
+                        <td class="small">
+                            Humidity: @item.Humidity%<br />
+                            Visibility: @item.Visibility @item.VisibilityUnit<br />
+                            Wind: @item.WindSpeedMph mph<br />
+                            Clouds: @item.Cloudiness%
+                        </td>
+                        <td>
+                            <input type="hidden" name="weatherId" value="@item.Id" />
+                            <button type="submit" data-id="@item.Id" class="btn btn-sm btn-outline-danger rounded-pill delete-btn">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-center text-muted">No weather data found in the database.</p>
+}

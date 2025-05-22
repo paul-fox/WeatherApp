@@ -26,7 +26,7 @@ namespace WeatherApp.Services
 
             using var client = new HttpClient
             {
-                BaseAddress = new Uri(_settings.WeatherURL)
+                BaseAddress = new Uri(_settings.WeatherUrlBase)
             };
 
             // Add an Accept header for JSON format.

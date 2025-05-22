@@ -19,7 +19,13 @@ namespace WeatherApp.Controllers
         {
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> WeatherTablePartial()
         {
             var weatherSqlModels = await _weatherSqlService.GetAllWeatherAsync();
 
@@ -55,7 +61,7 @@ namespace WeatherApp.Controllers
                     // Weather
                     Weather = entry.Weather,
                     WeatherDescription = entry.WeatherDescription,
-                    WeatherIconUrl = $"{_mySettings.IconURL}{entry.WeatherIcon}.png",
+                    WeatherIconUrl = $"{_mySettings.IconUrlBase}{entry.WeatherIcon}.png",
 
                     // Temp
                     TempFahrenheit = ConversionUtil.KelvinToFahrenheit(entry.Temp),
@@ -72,7 +78,7 @@ namespace WeatherApp.Controllers
                 };
             }).ToList();
 
-            return View(weatherViewModels);
+            return PartialView("_WeatherTable", weatherViewModels);
         }
 
         public IActionResult Privacy()
@@ -87,6 +93,7 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SearchLocationAsync(string query)
         {
             try
@@ -131,17 +138,27 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAllWeatherAsync()
         {
             await _weatherSqlService.UpdateAllWeatherAsync();
-            return RedirectToAction("Index");
+            _logger.LogInformation("Updated weather");
+            return Ok();
+        }
+
+        public class DeleteRequest
+        {
+            public int WeatherId { get; set; }
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteWeatherAsync(int weatherId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteWeatherAsync([FromBody] DeleteRequest request)
         {
+            var weatherId = request.WeatherId;
             await _weatherSqlService.DeleteWeatherAsync(weatherId);
-            return RedirectToAction("Index");
+            _logger.LogInformation("Deleting weather ID: {Id}", weatherId);
+            return Ok();
         }
     }
 }

@@ -13,6 +13,8 @@ builder.Services.AddTransient<ILocationApiService, LocationApiService>();
 builder.Services.AddTransient<IWeatherApiService, WeatherApiService>();
 builder.Services.AddTransient<IWeatherSqlService, WeatherSqlService>();
 
+builder.Services.AddHostedService<WeatherBackgroundService>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
